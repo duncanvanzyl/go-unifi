@@ -1,5 +1,6 @@
 {
     "name": ".{1,128}",
+    "type": "uap|ugw|usw|udm|uxg",
     "x": "",
     "y": "",
     "heightInMeters": "^([-]?[\\d]+[.]?[\\d]*)$",
