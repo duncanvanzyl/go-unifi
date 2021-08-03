@@ -3,7 +3,6 @@ package unifi
 import (
 	"context"
 	"fmt"
-	"log"
 )
 
 func (c *Client) ListDevice(ctx context.Context, site string) ([]Device, error) {
@@ -42,7 +41,7 @@ func (c *Client) GetDevice(ctx context.Context, site, id string) (*Device, error
 	return nil, &NotFoundError{}
 }
 
-func (c *Client) ProvisoionDeviceByMAC(ctx context.Context, site, mac string) (interface{}, error) {
+func (c *Client) ProvisoionDeviceByMAC(ctx context.Context, site, mac string) error {
 	reqBody := struct {
 		MAC string `json:"mac"`
 		CMD string `json:"cmd"`
@@ -51,23 +50,14 @@ func (c *Client) ProvisoionDeviceByMAC(ctx context.Context, site, mac string) (i
 		CMD: "force-provision",
 	}
 
-	// var respBody struct {
-	// 	Meta meta   `json:"meta"`
-	// 	Data []Site `json:"data"`
-	// }
-	respBody := make(map[string]string)
-
-	// POST https://192.168.1.8:8443/api/s/default/cmd/devmgr
-	// {"mac":"b4:fb:e4:27:87:65","cmd":"force-provision"}
-	// err := c.do(ctx, "GET", fmt.Sprintf("s/%s/stat/user/%s", site, mac), nil, &respBody)
-
-	err := c.do(ctx, "POST", fmt.Sprintf("s/%s/default/cmd/devmgr", site), reqBody, &respBody)
-	if err != nil {
-		return nil, err
+	var respBody struct {
+		Meta meta `json:"meta"`
 	}
 
-	log.Fatalf("%+v", respBody)
+	err := c.do(ctx, "POST", fmt.Sprintf("s/%s/cmd/devmgr", site), reqBody, &respBody)
+	if err != nil {
+		return err
+	}
 
-	// return respBody.Data, nil
-	return nil, nil
+	return respBody.Meta.error()
 }
